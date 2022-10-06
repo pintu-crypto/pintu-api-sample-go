@@ -1,35 +1,34 @@
-# Pintu Websocket Sample
+# Pintu Golang API Websocket Sample
 
-This sample code shows how the Pintu websocket API can be used to build a simple server that sends market orders to
- Pintu to be routed to the exchange and pulls in trades for reporting.
+This sample code shows how the Pintu websocket API can be used to build a simple http server that, upon triggering it's 'order' endpoint, sends the market order to Pintu's backend and monitors for order execution status.
 
-It provides a few pieces of functionality:
-1. Sample code that connects and authenticates with the Pintu websocket client and wrappers to encode requests and
- decode responses. See the *client* module.
-2. A simple http server that provides an API to send order requests, which are translated to market orders. See
- the *endpoint* module.
-3. A simple module that handles order requests and maintains the state of an active request. It also subscribes
- to post trades for reporting purposes. See the *order* module.
+The sample consists of the follwoing modules: 
+
+1. **client** - implementation of the API communication protocol (primitives and messages, autentication, etc.)
+2. **order** - implementation of the order send and order status receive loop handlers on client side
+3. **endpoint** - http web-service implementing the 'order' endpoint
+4. **cmd** - the application runner (main function)
 
 ## General Order Overview
 
-1. Subscribe to `ExecutionReport` with `StartDate` of the `Timestamp` of the last `ExecutionReport` processed to recover order state.
-2. Subscribe to `Trade` with `StartDate` of the `Timestamp` of the last `Trade` processed to recover any missed trades.
-3. Maintain a map of (`OrderID`, last received `ExecutionReport`) for open orders.
-4. Maintain a set of `ClOrdID` for each pending request.
-5. To submit an order, first generate a new `ClOrdID`. Send a `NewOrderSingle` specifying the [params](endpoint/endpoint.go#L109) (`ClOrdID`, `Side`, `Price`, `OrderQty`, `Strategy`, etc). for that request.
-6. The response for the request will be received on the `ExecutionReport` stream with the `ClOrdID` being the `ClOrdID` specified on the `NewOrderSingle`. If the order is accepted (`ExecType=PendingNew`), then add this order to the set of open orders.
-7. To cancel or modify the open order, generate a new `ClOrdID` and send an `OrderCancelRequest` specifying the the `ClOrdID`, `OrigClOrdID` from the previous successful request, and remaining parameters (see the details below).
-8. Fills will be received as `ExecutionReport` with `ExecType=Trade`.
+In order to receive updates from Pintu server, the client application has to:
 
-*`OrderCancelRequest` Request Keys
-**Key**|**Type**|**Required**|**Description**
-:-----:|:-----:|:-----:|:-----:
-ClOrdID|string|Y|Unique Client Order ID for this request, usually a UUID.
-OrigClOrdID|string|N|Client Order ID of the order to cancel, one of OrderID, OrigClOrdID is required.
-OrderID|string|N|Order ID of the order to cancel, one of OrderID, OrigClOrdID is required.
-TransactTime|string|Y|An ISO-8601 UTC string of the form 2019-02-13T05:17:32.000000Z.
+1. Subscribe to `ExecutionReport` channel with `StartDate` parameter. The `StartDate` could be omitted in case of the very first API connection of the client (it will use time.Now() at the backend), or it could be the `Timestamp` field value ofthe of the last `ExecutionReport` message processed from previous connection.
+2. Subscribe to `Trade` channel. In case the `StartDate` field is set, the backend will return all the `Trade`'s happened between the date specified and server's time.Now() value.
 
+To send the order to Pintu's backend the following action should be performed:
+
+1. First generate a new `ClOrdID`. The value can use any pattern to be generated. This sample is using the *uuid.New().String()* call
+2. Create and send the `NewOrderSingle` message specifying the [params](endpoint/endpoint.go#L109) (`ClOrdID`, `Side`, `Price`, `OrderQty`, `Strategy`, etc).
+
+To send the order cancellation request to Pintu's backend the following actions should be performed:
+
+1. First generate a new `ClOrdID` for the cancellation 
+2. Create and send then `OrderCancelRequest` specifying the newly generated `ClOrdID` and `OrigClOrdID`, which is the ClOrdId of the original order created via the `NewOrderSingle` message
+
+Please see the **endpoint** package for the implementation of the order creation flow
+
+Please refer to the Pintu API documentation for the messages and their required fields format
 
 ## Installing
 
