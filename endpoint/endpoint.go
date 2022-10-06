@@ -16,13 +16,13 @@ import (
 // RequestsChannel is a channel of http requests.
 type RequestsChannel <-chan *Request
 
-// Endpoint is the REST endpoint for the liquidate API.
+// Endpoint is the REST endpoint for the order API.
 type Endpoint struct {
 	requests chan *Request
 	addr     string
 }
 
-// Serve returns an http endpoint, which provides the client facing liquidation REST API.
+// Serve returns an http endpoint, which provides the client facing order REST API.
 func Serve(addr string) (result *Endpoint, err error) {
 	result = &Endpoint{
 		addr:     addr,
@@ -39,7 +39,7 @@ func (e *Endpoint) RequestsChannel() RequestsChannel {
 }
 
 func (e *Endpoint) runServe() {
-	http.HandleFunc("/liquidate", e.handleClientRequest)
+	http.HandleFunc("/order", e.handleClientRequest)
 	http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "pong")
 	})

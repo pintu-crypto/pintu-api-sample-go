@@ -6,10 +6,10 @@ This sample code shows how the Pintu websocket API can be used to build a simple
 It provides a few pieces of functionality:
 1. Sample code that connects and authenticates with the Pintu websocket client and wrappers to encode requests and
  decode responses. See the *client* module.
-2. A simple http server that provides an API to send liquidate requests, which are translated to market orders. See
+2. A simple http server that provides an API to send order requests, which are translated to market orders. See
  the *endpoint* module.
-3. A simple module that handles liquidation requests and maintains the state of an active request. It also subscribes
- to post trades for reporting purposes. See the *liquidation* module.
+3. A simple module that handles order requests and maintains the state of an active request. It also subscribes
+ to post trades for reporting purposes. See the *order* module.
 
 ## General Order Overview
 
@@ -58,10 +58,10 @@ For example:
     $ go run cmd/main.go --addr wss://partner.sandbox.pintu.co.id/ws/v1 --apikey ABCD1234ZXCV --apisecret oin201niasf1920ejalsdknasdnaliw1
 ```
 
-To request a liquidation of `210 DOGE` to `USDT`, run the following curl command from another window:
+To request a order of `210 DOGE` to `USDT`, run the following curl command from another window:
 
 ```shell script
-    $ curl localhost:8085/liquidate?symbol=DOGE-USDT&currency=DOGE&side=Buy&quantity=210
+    $ curl localhost:8085/order?symbol=DOGE-USDT&currency=DOGE&side=Buy&quantity=210
 ```
 
 If successful, you should see a response like:

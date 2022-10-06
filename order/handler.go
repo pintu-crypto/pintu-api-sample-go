@@ -1,4 +1,4 @@
-package liquidation
+package order
 
 import (
 	"encoding/json"
@@ -13,7 +13,7 @@ import (
 	"github.com/pintu-crypto/b2b-order/endpoint"
 )
 
-// Handler is the main liquidation state machine.
+// Handler is the main order state machine.
 type Handler struct {
 	incoming client.IncomingChannel
 	outgoing client.OutgoingChannel
@@ -29,7 +29,7 @@ type Handler struct {
 	closeWait sync.WaitGroup
 }
 
-// New initializes a liquidation handler, services incoming client liquidation requests,
+// New initializes a order handler, services incoming client order requests,
 // forwards those requests to the API, receives order and trade updates.
 func New(incoming client.IncomingChannel,
 	outgoing client.OutgoingChannel,
@@ -104,7 +104,7 @@ func (h *Handler) handleSubscribe() (err error) {
 }
 
 // handleRunning is the main handler that processes the next event,
-// either a request to liquidate or a response from the websocket server.
+// either a order request or a response from the websocket server.
 func (h *Handler) handleRunning() (err error) {
 	for {
 		select {
@@ -145,7 +145,7 @@ func (h *Handler) sendJSON(request interface{}) (err error) {
 	return
 }
 
-// handleRequest processes a liquidate request.
+// handleRequest processes a order request.
 func (h *Handler) handleRequest(request *endpoint.Request) (err error) {
 	h.requestID++
 

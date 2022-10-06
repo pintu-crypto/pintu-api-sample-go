@@ -2,7 +2,7 @@ package endpoint
 
 import "github.com/pintu-crypto/b2b-order/client"
 
-// Request is an incoming client request to liquidate, for example. It has a message that represents the incoming
+// Request is an incoming client request to order, for example. It has a message that represents the incoming
 // request, and a channel to respond to the request.
 type Request struct {
 	message  *client.NewOrderSingle

@@ -10,14 +10,14 @@ import (
 
 	"github.com/pintu-crypto/b2b-order/client"
 	"github.com/pintu-crypto/b2b-order/endpoint"
-	"github.com/pintu-crypto/b2b-order/liquidation"
+	"github.com/pintu-crypto/b2b-order/order"
 )
 
 var addr = flag.String("addr", "", "Pintu websocket address")
 var apikey = flag.String("apikey", "", "Pintu api key")
 var apisecret = flag.String("apisecret", "", "Pintu api secret")
 
-var serveAddr = flag.String("serve-addr", ":8085", "Liquidate server address")
+var serveAddr = flag.String("serve-addr", ":8085", "Order server address")
 
 var interrupt = make(chan os.Signal, 1)
 
@@ -76,21 +76,18 @@ func connectAndRun(addr, apikey, apisecret string, requestsEndpoint *endpoint.En
 	}
 	defer websocketClient.Close()
 
-	handler, err := liquidation.New(websocketClient.IncomingChannel(),
+	handler, err := order.New(websocketClient.IncomingChannel(),
 		websocketClient.OutgoingChannel(),
 		requestsEndpoint.RequestsChannel())
 	if err != nil {
-		log.Fatalf("unable to create liquidation handler %s", err)
+		log.Fatalf("unable to create order handler %s", err)
 	}
 	defer handler.Close()
 
-	for {
-		// loop until the user requested shutdown or there was a connection error
-		select {
-		case <-interrupt:
-			return nil
-		case err = <-websocketClient.ErrorChannel():
-			return err
-		}
+	select {
+	case <-interrupt:
+		return nil
+	case err = <-websocketClient.ErrorChannel():
+		return err
 	}
 }
