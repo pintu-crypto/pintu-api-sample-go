@@ -1,8 +1,8 @@
 # Pintu Golang API Websocket Sample
 
-This sample code shows how the Pintu websocket API can be used to build a simple http server that, upon triggering it's 'order' endpoint, sends the market order to Pintu's backend and monitors for order execution status.
+This sample code shows how the Pintu websocket API can be used to build a simple http server that, upon triggering it's `order` endpoint, sends the market order to Pintu's backend and monitors for order execution status.
 
-The sample consists of the follwoing modules: 
+The sample consists of the following modules: 
 
 1. **client** - implementation of the API communication protocol (primitives and messages, autentication, etc.)
 2. **order** - implementation of the order send and order status receive loop handlers on client side
